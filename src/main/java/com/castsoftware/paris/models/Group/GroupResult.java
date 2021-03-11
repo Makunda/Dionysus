@@ -1,0 +1,40 @@
+package com.castsoftware.paris.models.Group;
+
+public class GroupResult {
+	private Long idDioGroup;
+	private Long objectConcerned;
+	private String name;
+	private String description;
+
+	public Long getObjectConcerned() {
+		return objectConcerned;
+	}
+
+	public void setObjectConcerned(Long objectConcerned) {
+		this.objectConcerned = objectConcerned;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+
+	public String getDescription() {
+		return description;
+	}
+
+
+
+	public Long getIdDioGroup() {
+		return idDioGroup;
+	}
+
+
+	public GroupResult(Group dg, Long objectConcerned) {
+		assert dg.getNode() != null: "Cannot create a DioResult from a note instantiated DioGroup";
+		this.idDioGroup = dg.getNode().getId();
+		this.objectConcerned = objectConcerned;
+		this.name = dg.getName();
+		this.description = dg.getDescription();
+	}
+}
