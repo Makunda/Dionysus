@@ -3,6 +3,7 @@ package com.castsoftware.paris.procedures;
 import com.castsoftware.paris.controllers.ParisGroupController;
 import com.castsoftware.paris.database.Neo4jAL;
 import com.castsoftware.paris.exceptions.ProcedureException;
+import com.castsoftware.paris.exceptions.neo4j.Neo4JTemplateLanguageException;
 import com.castsoftware.paris.exceptions.neo4j.Neo4jConnectionError;
 import com.castsoftware.paris.exceptions.neo4j.Neo4jQueryException;
 import com.castsoftware.paris.models.Group.Group;
@@ -214,6 +215,23 @@ public class GroupProcedures {
       List<GroupResult> results = ParisGroupController.forecastAllGroups(nal, application);
       return results.stream().map(CustomExecutionResult::new);
     } catch (Exception | Neo4jConnectionError | Neo4jQueryException e) {
+      ProcedureException ex = new ProcedureException(e);
+      log.error("An error occurred while executing the procedure", e);
+      throw ex;
+    }
+  }
+
+  @Procedure(value = "paris.groups.execute.list", mode = Mode.WRITE)
+  @Description(
+          "paris.groups.execute.list(String application, List<Long> idList, String executionType) - Execute a list of group on a specific application with the given context")
+  public Stream<LongResult> executeList(@Name(value = "Application") String application, @Name(value = "ListID") List<Long> listID,  @Name(value = "ExecutionType")  String executionType)
+          throws ProcedureException {
+
+    try {
+      Neo4jAL nal = new Neo4jAL(db, transaction, log);
+      Long results = ParisGroupController.executeListTags(nal, listID, application, executionType);
+      return Stream.of(new LongResult(results));
+    } catch (Exception | Neo4jConnectionError | Neo4jQueryException | Neo4JTemplateLanguageException e) {
       ProcedureException ex = new ProcedureException(e);
       log.error("An error occurred while executing the procedure", e);
       throw ex;

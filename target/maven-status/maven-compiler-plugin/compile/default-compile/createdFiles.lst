@@ -1,6 +1,7 @@
 com\castsoftware\paris\exceptions\ExtensionException.class
 com\castsoftware\paris\configuration\UserConfiguration.class
 com\castsoftware\paris\results\RelationshipResult.class
+com\castsoftware\paris\controllers\ParisCypherRequests.class
 com\castsoftware\paris\results\CustomGroupResult.class
 com\castsoftware\paris\metaLanguage\MetaLanguageProcessor.class
 com\castsoftware\paris\models\Case\Case.class
@@ -15,6 +16,7 @@ com\castsoftware\paris\configuration\Configuration.class
 com\castsoftware\paris\exceptions\ProcedureException.class
 com\castsoftware\paris\metaLanguage\MetaRequestType.class
 com\castsoftware\paris\exceptions\neo4j\Neo4jBadRequestException.class
+com\castsoftware\paris\procedures\CypherProcedures.class
 com\castsoftware\paris\models\Group\GroupType.class
 com\castsoftware\paris\results\OutputMessage.class
 com\castsoftware\paris\exceptions\file\FilePermissionException.class

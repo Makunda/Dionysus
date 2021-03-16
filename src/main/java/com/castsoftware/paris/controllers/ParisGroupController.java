@@ -232,7 +232,52 @@ public class ParisGroupController {
 		return results;
 	}
 
+	/**
+	 * Execute a specific group on an application
+	 * @param neo4jAL Neo4j Access Layer
+	 * @param idGroup Id of the group to execute
+	 * @param application Name of the application concerned
+	 * @param executionType Type of the execution ( Tag, Statistics, etc ...)
+	 * @return
+	 * @throws Neo4jQueryException
+	 * @throws Neo4JTemplateLanguageException
+	 */
+	public static Long executeTag(Neo4jAL neo4jAL, Long idGroup, String application, String executionType) throws Neo4jQueryException, Neo4JTemplateLanguageException {
+		String req = String.format("MATCH (o:%1$s) WHERE ID(o)=$id RETURN o as node LIMIT 1", Group.getLabelPropertyAsString());
+		Map<String, Object> params = Map.of("id", idGroup);
+		Result res = neo4jAL.executeQuery(req, params);
 
+		if(!res.hasNext()) {
+			neo4jAL.logInfo(String.format("Group Node with id '%d' was not found.", idGroup));
+			return 0L;
+		}
 
+		Node n = (Node) res.next().get("node");
+		Group gr = Group.fromNode(n);
+		assert gr != null: String.format("Failed to retrieve node with Id %d. Not in correct format.", idGroup);
+		return gr.execute(neo4jAL, application, GroupType.getFromString(executionType));
+	}
 
+	/**
+	 * Launch a list of groups on an application
+	 * @param neo4jAL Neo4j Access Layer
+	 * @param listIDGroup List of Ids
+	 * @param application Name of the application concerned
+	 * @param executionType  Type of the execution ( Tag, Statistics, etc ...)
+	 * @return
+	 * @throws Neo4jQueryException
+	 * @throws Neo4JTemplateLanguageException
+	 */
+	public static Long executeListTags(Neo4jAL neo4jAL, List<Long> listIDGroup, String application, String executionType) throws Neo4jQueryException, Neo4JTemplateLanguageException {
+		Long total = 0L;
+		for(Long id : listIDGroup) {
+			try {
+				total += executeTag(neo4jAL, id, application, executionType);
+			} catch (Exception  e) {
+				neo4jAL.logInfo(String.format("Ignored tag with ID %d due to an error during its execution.", id));
+			}
+		}
+
+		return total;
+	}
 }

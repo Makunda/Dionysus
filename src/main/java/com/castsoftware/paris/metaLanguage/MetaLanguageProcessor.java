@@ -104,10 +104,12 @@ public class MetaLanguageProcessor {
 
 		MetaRequest metaRequest = new MetaRequest();
 		metaRequest.setApplication(application); // Assign application
+
+
 		metaRequest.setRequest(request); // Assign request
 
 		metaRequest = processApplicationContext(metaRequest); // Replace the application anchors
-		metaRequest = findAndReplaceReturnTag(metaRequest); // Find the return value and assign the type to the request
+		//metaRequest = findAndReplaceReturnTag(metaRequest); // Find the return value and assign the type to the request
 
 		metaRequest.setRequest(cleanResidualTags(metaRequest.getRequest())); // Clean the residual
 

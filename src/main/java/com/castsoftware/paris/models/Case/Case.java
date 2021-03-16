@@ -13,7 +13,7 @@ public class Case {
 	public static final String LABEL_PROPERTY = "ParisCase";
 
 	// RelationShips
-	private static final String TO_DIOCASE_RELATIONSHIP = "INCLUDES";
+	private static final String TO_CASE_RELATIONSHIP = "INCLUDES";
 
 	// Properties
 	private static final String TITLE_PROPERTY = "Title";
@@ -93,8 +93,8 @@ public class Case {
 		return dc;
 	}
 
-	public static String getToDiocaseRelationship() {
-		return TO_DIOCASE_RELATIONSHIP;
+	public static String getToCaseRelationship() {
+		return TO_CASE_RELATIONSHIP;
 	}
 
 	public static Label getLabelProperty() {

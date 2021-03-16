@@ -142,7 +142,7 @@ public class ParisCaseController {
 						"WITH o " +
 						"MATCH (g:%2$s) WHERE ID(g)=$idChild " +
 						"MERGE (o)-[r:%3$s]->(g) RETURN r as rel", Case.getLabelPropertyAsString(),
-				Case.getLabelPropertyAsString(), Case.getToDiocaseRelationship()
+				Case.getLabelPropertyAsString(), Case.getToCaseRelationship()
 		);
 		Map<String, Object> params = Map.of("idParent", idParent, "idChild", idChild);
 		Result res = neo4jAL.executeQuery(req, params);
@@ -162,8 +162,9 @@ public class ParisCaseController {
 	public static List<Case> getAttachedCases(Neo4jAL neo4jAL, Long idUseCase) throws Neo4jQueryException {
 		String req = String.format("MATCH (o:%1$s)-[:%2$s]->(g:%3$s) WHERE ID(o)=$idUseCase RETURN g as node",
 				Case.getLabelPropertyAsString(),
-				Case.getToDiocaseRelationship() , Case.getLabelPropertyAsString()
+				Case.getToCaseRelationship() , Case.getLabelPropertyAsString()
 		);
+		neo4jAL.logInfo("DEBUG: " + req);
 		Map<String, Object> params = Map.of("idUseCase", idUseCase);
 
 		List<Case> returnList = new ArrayList<>();
@@ -231,7 +232,7 @@ public class ParisCaseController {
 	 */
 	public static Relationship detachFromCase(Neo4jAL neo4jAL, Long idParent, Long idChild) throws Neo4jQueryException {
 		String req = String.format("MATCH (o:%1$s)-[r:%2$s]->(g:%3$s) WHERE ID(o)=$idParent AND WHERE ID(g)=$idChild " +
-				"RETURN r as rel;", Case.getLabelPropertyAsString(),  Case.getToDiocaseRelationship(), Case.getLabelPropertyAsString());
+				"RETURN r as rel;", Case.getLabelPropertyAsString(),  Case.getToCaseRelationship(), Case.getLabelPropertyAsString());
 		Map<String, Object> params = Map.of("idParent", idParent, "idChild", idChild);
 		Result res = neo4jAL.executeQuery(req, params);
 

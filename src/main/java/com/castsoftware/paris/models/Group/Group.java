@@ -8,8 +8,10 @@ import com.castsoftware.paris.metaLanguage.MetaLanguageProcessor;
 import com.castsoftware.paris.metaLanguage.MetaRequest;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
 
+import javax.management.relation.Relation;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,7 +81,7 @@ public class Group {
     Node node = neo4jAL.createNode(getLabelProperty());
 
     node.setProperty(getActiveProperty(), active);
-    node.setProperty(getCategoriesProperty(), categories);
+    node.setProperty(getCategoriesProperty(), categories.toArray(new String[0]));
     node.setProperty(getCreationDateProperty(), creationDate);
     node.setProperty(getCypherRequestProperty(), cypherRequest);
     node.setProperty(getCypherRequestReturnProperty(), cypherRequestReturn);
@@ -87,7 +89,8 @@ public class Group {
     node.setProperty(getGroupNameProperty(), groupName);
     node.setProperty(getNameProperty(), name);
     node.setProperty(getSelectedProperty(), selected);
-    node.setProperty(getSelectedProperty(), types.stream().map(GroupType::toString).toArray());
+
+    node.setProperty(getTypeProperty(), types.stream().map(GroupType::toString).toArray(String[]::new));
 
     this.node = node;
     return this.node;
@@ -215,7 +218,7 @@ public class Group {
 
   public void setCategories(List<String> categories) {
     this.categories = categories;
-    setNodeProperty(CATEGORIES_PROPERTY, categories);
+    setNodeProperty(CATEGORIES_PROPERTY, categories.toArray(new String[0]));
   }
 
   public Long getCreationDate() {
@@ -288,7 +291,7 @@ public class Group {
   public void setTypes(List<GroupType> types) {
     this.types = types;
     // Convert Types to string
-    setNodeProperty(NAME_PROPERTY, types.stream().map(GroupType::toString).toArray());
+    setNodeProperty(NAME_PROPERTY, types.stream().map(GroupType::toString).toArray(String[]::new));
   }
 
   public Node getNode() {
@@ -318,10 +321,54 @@ public class Group {
    * LOGIC
    */
 
+  /**
+   * Apply a tag on the Neo4j element
+   * @param neo4jObject Neo4j object to tag
+   * @param tag
+   * @throws Neo4JTemplateLanguageException
+   * @throws Neo4jQueryException
+   */
+  private void applyTag(Object neo4jObject, String tag) throws Neo4JTemplateLanguageException, Neo4jQueryException {
+    // tag a node
+    if(neo4jObject instanceof Node) {
+      Node node = (Node) neo4jObject;
+
+      if(node.hasProperty("Tags")) {
+        List<String> tags = (List<String>) node.getProperty("Tags");
+        tags.add(tag);
+        node.setProperty("Tags", tags.toArray(String[]::new));
+      } else {
+        String[] tags = { tag };
+        node.setProperty("Tags", tags);
+      }
+    } else if(neo4jObject instanceof Relationship) { // Tag a rel
+      Relationship rel = (Relationship) neo4jObject;
+      applyTag(rel.getEndNode(), tag);
+      applyTag(rel.getStartNode(), tag);
+    }
+  }
+
+  private Long executeAsTag(Neo4jAL neo4jAL, String application) throws Neo4JTemplateLanguageException, Neo4jQueryException {
+    MetaRequest mr = MetaLanguageProcessor.forgeRequest(this.cypherRequest, application);
+    Result res = neo4jAL.executeQuery(mr.getRequest());
+
+    Long numTagged = 0L;
+    while (res.hasNext()) {
+      applyTag(res.next().get(mr.getReturnValue()), this.groupName);
+      numTagged++;
+    }
+
+    return numTagged;
+  }
+
 
   // Execute group
-  public void execute(Neo4jAL neo4jAL, String application) {
+  public Long execute(Neo4jAL neo4jAL, String application, GroupType executionType) throws Neo4jQueryException, Neo4JTemplateLanguageException {
+    if(executionType == GroupType.TAG) {
+      return executeAsTag(neo4jAL, application);
+    }
 
+    return 0L;
   }
 
   /**
