@@ -1,7 +1,7 @@
 package com.castsoftware.paris.models.Group;
 
 public class GroupResult {
-	private Long idDioGroup;
+	private Long idGroup;
 	private Long objectConcerned;
 	private String name;
 	private String description;
@@ -25,14 +25,14 @@ public class GroupResult {
 
 
 
-	public Long getIdDioGroup() {
-		return idDioGroup;
+	public Long getIdGroup() {
+		return idGroup;
 	}
 
 
 	public GroupResult(Group dg, Long objectConcerned) {
-		assert dg.getNode() != null: "Cannot create a DioResult from a note instantiated DioGroup";
-		this.idDioGroup = dg.getNode().getId();
+		assert dg.getNode() != null: "Cannot create a GroupResult from a not instantiated Group Node";
+		this.idGroup = dg.getNode().getId();
 		this.objectConcerned = objectConcerned;
 		this.name = dg.getName();
 		this.description = dg.getDescription();

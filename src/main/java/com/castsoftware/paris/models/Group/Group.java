@@ -13,6 +13,7 @@ import org.neo4j.graphdb.Result;
 
 import javax.management.relation.Relation;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Group {
@@ -328,19 +329,24 @@ public class Group {
    * @throws Neo4JTemplateLanguageException
    * @throws Neo4jQueryException
    */
-  private void applyTag(Object neo4jObject, String tag) throws Neo4JTemplateLanguageException, Neo4jQueryException {
+  private void applyTag( Object neo4jObject, String tag) throws Neo4JTemplateLanguageException, Neo4jQueryException {
     // tag a node
+
     if(neo4jObject instanceof Node) {
       Node node = (Node) neo4jObject;
 
+
       if(node.hasProperty("Tags")) {
-        List<String> tags = (List<String>) node.getProperty("Tags");
-        tags.add(tag);
-        node.setProperty("Tags", tags.toArray(String[]::new));
+        List<String> tags = Neo4jTypeManager.getAsStringList(node, "Tags");
+
+        if(!tags.contains(tag)) tags.add(tag);
+
+        node.setProperty("Tags", tags.toArray(new String[0]));
       } else {
         String[] tags = { tag };
         node.setProperty("Tags", tags);
       }
+
     } else if(neo4jObject instanceof Relationship) { // Tag a rel
       Relationship rel = (Relationship) neo4jObject;
       applyTag(rel.getEndNode(), tag);
@@ -349,18 +355,31 @@ public class Group {
   }
 
   private Long executeAsTag(Neo4jAL neo4jAL, String application) throws Neo4JTemplateLanguageException, Neo4jQueryException {
-    MetaRequest mr = MetaLanguageProcessor.forgeRequest(this.cypherRequest, application);
+    MetaRequest mr = MetaLanguageProcessor.forgeRequest(this.cypherRequest, this.cypherRequestReturn, application);
+    if(mr.getRequest() == null) return 0L;
+
+
+
     Result res = neo4jAL.executeQuery(mr.getRequest());
+
+    // TODO extract to configuration
+    String parisPrefix = "p_";
+
+
 
     Long numTagged = 0L;
     while (res.hasNext()) {
-      applyTag(res.next().get(mr.getReturnValue()), this.groupName);
+      Map<String, Object> returned = res.next();
+
+      applyTag(returned.get(mr.getReturnValue()), parisPrefix+  this.groupName);
       numTagged++;
     }
 
+
+    neo4jAL.logInfo("Result  : " + numTagged);
+
     return numTagged;
   }
-
 
   // Execute group
   public Long execute(Neo4jAL neo4jAL, String application, GroupType executionType) throws Neo4jQueryException, Neo4JTemplateLanguageException {
@@ -382,7 +401,7 @@ public class Group {
     if (this.cypherRequest.isBlank()) return null;
 
     // Build the meta request
-    MetaRequest mr = MetaLanguageProcessor.forgeRequest(this.cypherRequest, application);
+    MetaRequest mr = MetaLanguageProcessor.forgeRequest(this.cypherRequest, this.cypherRequestReturn, application);
     if(mr == null) {
       neo4jAL.logError(String.format("It seems that the Meta-Request creation failed for tag : %s", this.toString()));
       return null;

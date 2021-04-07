@@ -82,6 +82,7 @@ public class MetaLanguageProcessor {
 				metaRequest.setRequest(
 						metaRequest.getRequest().replaceFirst( en.getValue().pattern(), replacer));
 				metaRequest.setReturnValue("val");
+
 				return metaRequest;
 			}
 		}
@@ -93,11 +94,12 @@ public class MetaLanguageProcessor {
 	/**
 	 * Forge the meta request
 	 * @param request Request of the tag
+	 * @param returnVal Value of the return
 	 * @param application Application used for the execution
 	 * @return The meta request ( request enriched with information )
 	 * @throws Neo4JTemplateLanguageException If the request isn't correct ( talking about templates )
 	 */
-	public static MetaRequest forgeRequest(String request, String application) throws Neo4JTemplateLanguageException {
+	public static MetaRequest forgeRequest(String request, String returnVal, String application) throws Neo4JTemplateLanguageException {
 
 		assert (request != null && application != null) : "The parameters provided cannot be null";
 		if(request.isBlank() || application.isBlank()) return null;
@@ -107,6 +109,7 @@ public class MetaLanguageProcessor {
 
 
 		metaRequest.setRequest(request); // Assign request
+		metaRequest.setReturnValue(returnVal);
 
 		metaRequest = processApplicationContext(metaRequest); // Replace the application anchors
 		//metaRequest = findAndReplaceReturnTag(metaRequest); // Find the return value and assign the type to the request

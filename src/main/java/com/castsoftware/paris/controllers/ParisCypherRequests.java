@@ -54,7 +54,7 @@ public class ParisCypherRequests {
 			}
 
 			try {
-				MetaRequest forged = MetaLanguageProcessor.forgeRequest(req, "Test");
+				MetaRequest forged = MetaLanguageProcessor.forgeRequest(req, awaitedReturn, "Test");
 				if(forged == null) return false;
 
 				neo4jAL.executeQuery(forged.getRequest());

@@ -100,21 +100,26 @@ public class CaseProcedures {
 
 	@Procedure(value = "paris.cases.update.by.id", mode = Mode.WRITE)
 	@Description(
-			"paris.cases.update.by.id( String Title, String Description, List<String> Categories, Boolean active, Boolean selected) - Create a new Dio Case")
+			"paris.cases.update.by.id( String Title, String Description, List<String> Categories, Boolean active, Boolean selected, Optional Long ParentId) - Create a new Dio Case")
 	public Stream<CustomCaseResult> updateGroup(
 			@Name(value = "Id") Long id,
 			@Name(value = "Title") String title,
 			@Name(value = "Description") String description,
 			@Name(value = "Categories") List<String> categories,
 			@Name(value = "Active") Boolean active,
-			@Name(value = "Selected") Boolean selected)
+			@Name(value = "Selected") Boolean selected,
+			@Name(value = "ParentID", defaultValue = "-1") Long parentId
+			)
 			throws ProcedureException {
 
 		try {
 			Neo4jAL nal = new Neo4jAL(db, transaction, log);
 			Case aCase =
 					ParisCaseController.updateCase(
-							nal, id, title, description, categories, active, selected);
+							nal, id, title, description, categories, active, selected, parentId);
+
+			if(aCase == null) return Stream.empty();
+
 			return Stream.of(new CustomCaseResult(aCase));
 		} catch (Exception | Neo4jConnectionError | Neo4jQueryException e) {
 			ProcedureException ex = new ProcedureException(e);

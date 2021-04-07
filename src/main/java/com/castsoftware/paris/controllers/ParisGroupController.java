@@ -27,9 +27,12 @@ public class ParisGroupController {
 	 */
 	public static List<Group> getAllGroupNodes(Neo4jAL neo4jAL) throws Neo4jQueryException {
 		Iterator<Node> it = neo4jAL.findNodes(Group.getLabelProperty());
+
 		List<Group> retList = new ArrayList<>();
 		while (it.hasNext()) {
-			retList.add(Group.fromNode(it.next()));
+			Node n = it.next();
+			if(!n.getRelationships().iterator().hasNext()) continue; // Get only nodes with parent
+			retList.add(Group.fromNode(n));
 		}
 		return retList;
 	}
@@ -158,6 +161,9 @@ public class ParisGroupController {
 		Result res = neo4jAL.executeQuery(req, params);
 		if(res.hasNext()) {
 			Node n = (Node) res.next().get("node");
+
+			// Detach delete
+			for(Relationship rel : n.getRelationships()) rel.delete();
 			n.delete();
 
 			dn.createNode(neo4jAL);
@@ -274,7 +280,7 @@ public class ParisGroupController {
 			try {
 				total += executeTag(neo4jAL, id, application, executionType);
 			} catch (Exception  e) {
-				neo4jAL.logInfo(String.format("Ignored tag with ID %d due to an error during its execution.", id));
+				neo4jAL.logError(String.format("Ignored tag with ID %d due to an error during its execution.", id), e);
 			}
 		}
 

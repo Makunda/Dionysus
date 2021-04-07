@@ -160,21 +160,21 @@ public class Case {
 
 	public void setDescription(String description) {
 		this.description = description;
-		setNodeProperty(getDescriptionProperty(), description);
+    	node.setProperty(getDescriptionProperty(), description);
 	}
 
 	public void setCategories(List<String> categories) {
 		this.categories = categories;
-		setNodeProperty(getCategoriesProperty(), categories.toArray());
+		node.setProperty(getCategoriesProperty(), categories.toArray(new String[0]));
 	}
 
 	public void setActive(Boolean active) {
 		this.active = active;
-		setNodeProperty(getActiveProperty(), active);
+		node.setProperty(getActiveProperty(), active);
 	}
 
 	public void setSelected(Boolean selected) {
 		this.selected = selected;
-		setNodeProperty(getSelectedProperty(), selected);
+		node.setProperty(getSelectedProperty(), selected);
 	}
 }

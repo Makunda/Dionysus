@@ -70,6 +70,7 @@ public class ParisCaseController {
 		}
 	}
 
+
 	/**
 	 * Creat a new Case
 	 * @param neo4jAL Neo4j Access Layer
@@ -95,11 +96,11 @@ public class ParisCaseController {
 
 	/**
 	 * Update a Dio Case using its id
-	 * @param neo4jAL
-	 * @param id
-	 * @param title
-	 * @param description
-	 * @param categories
+	 * @param neo4jAL Neo4j Access Layer
+	 * @param id Id of the Case
+	 * @param title Title of the use case
+	 * @param description Quick description of the use case
+	 * @param categories Categories related to the use case
 	 * @param active
 	 * @param selected
 	 * @return
@@ -111,19 +112,31 @@ public class ParisCaseController {
 								  String description,
 								  List<String> categories,
 								  Boolean active,
-								  Boolean selected) throws Neo4jQueryException {
+								  Boolean selected,
+								  Long parentId) throws Neo4jQueryException {
 
 		String req = String.format("MATCH (o:%1$s) WHERE ID(o)=$id RETURN o as node LIMIT 1", Case.getLabelPropertyAsString());
 		Map<String, Object> params = Map.of("id", id);
-		Case dc = new Case(title, description, categories, active, selected);
 
 		Result res = neo4jAL.executeQuery(req, params);
 		if(res.hasNext()) {
 			Node n = (Node) res.next().get("node");
-			neo4jAL.detachDelete(n);
+			Case toUpdate = Case.fromNode(n);
 
-			dc.createNode(neo4jAL);
-			return dc;
+			if(toUpdate == null) return null; // If failed to create ignore
+
+			toUpdate.setTitle(title);
+			toUpdate.setDescription(description);
+			toUpdate.setCategories(categories);
+			toUpdate.setActive(active);
+			toUpdate.setSelected(selected);
+
+			// Change parent
+			if(parentId != -1) {
+				changeParent(neo4jAL, parentId, id);
+			}
+
+			return toUpdate;
 		}
 
 		return null;
@@ -153,6 +166,33 @@ public class ParisCaseController {
 	}
 
 	/**
+	 * Detach a node from its ancient relations and create a new one
+	 * @param neo4jAL Neo4j Access Layer
+	 * @param idParent Id of the parent
+	 * @param idChild Id of the child
+	 * @return
+	 * @throws Neo4jQueryException
+	 */
+	public static Relationship changeParent(Neo4jAL neo4jAL, Long idParent, Long idChild) throws Neo4jQueryException {
+		String req = String.format("MATCH (o:%1$s) WHERE ID(o)=$idChild " +
+						"WITH o " +
+						"OPTIONAL MATCH (i:%1$s)-[r:%2$s]->(o) WHERE ID(i)<>ID(o) DELETE r " +
+						"WITH o " +
+						"MATCH (g:%1$s) WHERE ID(g)=$idParent " +
+						"MERGE (g)-[r:%2$s]->(o) RETURN r as rel", Case.getLabelPropertyAsString(),
+				Case.getToCaseRelationship()
+		);
+		neo4jAL.logInfo("To execute : " + req);
+		neo4jAL.logInfo("To idParent : " + idParent + "  And  idChild " + idChild);
+		Map<String, Object> params = Map.of("idParent", idParent, "idChild", idChild);
+		Result res = neo4jAL.executeQuery(req, params);
+
+		if(!res.hasNext()) return null;
+
+		return (Relationship) res.next().get("rel");
+	}
+
+	/**
 	 * Get all the Case attach to this node
 	 * @param neo4jAL Neo4j Access Layer
 	 * @param idUseCase Id of the DioCase
@@ -164,12 +204,11 @@ public class ParisCaseController {
 				Case.getLabelPropertyAsString(),
 				Case.getToCaseRelationship() , Case.getLabelPropertyAsString()
 		);
-		neo4jAL.logInfo("DEBUG: " + req);
 		Map<String, Object> params = Map.of("idUseCase", idUseCase);
 
 		List<Case> returnList = new ArrayList<>();
 		Result res = neo4jAL.executeQuery(req, params);
-		if(res.hasNext()) {
+		while(res.hasNext()) {
 			Node n = (Node) res.next().get("node");
 			returnList.add(Case.fromNode(n));
 		}
@@ -193,7 +232,7 @@ public class ParisCaseController {
 
 		List<Group> returnList = new ArrayList<>();
 		Result res = neo4jAL.executeQuery(req, params);
-		if(res.hasNext()) {
+		while(res.hasNext()) {
 			Node n = (Node) res.next().get("node");
 			returnList.add(Group.fromNode(n));
 		}
