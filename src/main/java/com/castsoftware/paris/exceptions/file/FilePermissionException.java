@@ -27,6 +27,7 @@ public class FilePermissionException extends ExtensionException {
     super(MESSAGE_PREFIX.concat(path), cause, CODE_PREFIX.concat(code));
   }
 
+
   public FilePermissionException(String message, String path, Throwable cause, String code) {
     super(
         MESSAGE_PREFIX.concat(message).concat(". Path : ").concat(path),

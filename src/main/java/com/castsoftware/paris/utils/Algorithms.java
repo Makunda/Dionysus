@@ -57,33 +57,35 @@ public class Algorithms {
     return cost[len0 - 1];
   }
 
-  public static String getAlphaNumericString(int n)
+  /**
+   * Get a random string of the desired length
+   * @param length
+   * @return
+   */
+  public static String getAlphaNumericString(int length)
   {
 
-    // lower limit for LowerCase Letters
-    int lowerLimit = 97;
+    // create a string of all characters
+    String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    StringBuilder sb = new StringBuilder();
 
-    // lower limit for LowerCase Letters
-    int upperLimit = 122;
-
+    // create an object of Random class
     Random random = new Random();
 
-    // Create a StringBuffer to store the result
-    StringBuffer r = new StringBuffer(n);
+    for(int i = 0; i < length; i++) {
 
-    for (int i = 0; i < n; i++) {
+      // generate random index number
+      int index = random.nextInt(alphabet.length());
 
-      // take a random value between 97 and 122
-      int nextRandomChar = lowerLimit
-              + (int)(random.nextFloat()
-              * (upperLimit - lowerLimit + 1));
+      // get character specified by index
+      // from the string
+      char randomChar = alphabet.charAt(index);
 
-      // append a character at the end of bs
-      r.append((char)nextRandomChar);
+      // append the character to string builder
+      sb.append(randomChar);
     }
 
-    // return the resultant string
-    return r.toString();
+    return sb.toString();
   }
 
 }

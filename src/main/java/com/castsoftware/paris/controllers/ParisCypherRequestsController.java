@@ -9,7 +9,7 @@ import com.castsoftware.paris.metaLanguage.MetaRequest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ParisCypherRequests {
+public class ParisCypherRequestsController {
 
 	/**
 	 * Check the validity of a query before the insertion in the database

@@ -33,4 +33,8 @@ public class FileIOException extends ExtensionException {
   public FileIOException(String path, Throwable cause, String code) {
     super(MESSAGE_PREFIX.concat(path), cause, CODE_PREFIX.concat(code));
   }
+
+  public FileIOException(String path, String code) {
+    super(MESSAGE_PREFIX.concat(path), CODE_PREFIX.concat(code));
+  }
 }

@@ -14,11 +14,12 @@
 
 package com.castsoftware.paris.io;
 
-import com.castsoftware.artemis.config.Configuration;
-import com.castsoftware.artemis.database.Neo4jAL;
-import com.castsoftware.artemis.exceptions.ProcedureException;
-import com.castsoftware.artemis.exceptions.file.FileCorruptedException;
-import com.castsoftware.artemis.exceptions.neo4j.Neo4jQueryException;
+
+import com.castsoftware.paris.configuration.Configuration;
+import com.castsoftware.paris.database.Neo4jAL;
+import com.castsoftware.paris.exceptions.ProcedureException;
+import com.castsoftware.paris.exceptions.file.FileCorruptedException;
+import com.castsoftware.paris.exceptions.neo4j.Neo4jQueryException;
 import org.neo4j.graphdb.*;
 import org.neo4j.logging.Log;
 

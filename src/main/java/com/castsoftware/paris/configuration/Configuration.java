@@ -66,18 +66,20 @@ public class Configuration {
    */
   public static String get(String key) {
     PROPERTIES = loadConfiguration();
+
+    assert PROPERTIES != null : "Failed to load the configuration file : 'paris.properties'";
     return PROPERTIES.get(key).toString();
   }
 
   private static Properties loadConfiguration() {
     try (InputStream input =
-        Configuration.class.getClassLoader().getResourceAsStream("artemis.properties")) {
+        Configuration.class.getClassLoader().getResourceAsStream("paris.properties")) {
 
       Properties prop = new Properties();
 
       if (input == null) {
         throw new MissingFileException(
-            "No file 'artemis.properties' was found.",
+            "No file 'paris.properties' was found.",
             "resources/procedure.properties",
             "CONFxLOAD1");
       }
