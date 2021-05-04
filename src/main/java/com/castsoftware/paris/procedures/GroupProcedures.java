@@ -128,6 +128,48 @@ public class GroupProcedures {
     }
   }
 
+  @Procedure(value = "paris.groups.merge.as.toSort", mode = Mode.WRITE)
+  @Description(
+      "paris.groups.merge.as.toSort(Boolean active, List<String> categories, Long creationDate, String cypherRequest, String cypherRequestReturn, String description, String groupName, String name, Boolean selected, List<String> typesAsList) - Create a new Dio Group")
+  public Stream<CustomGroupResult> mergeAsToSort(
+      @Name(value = "Active") Boolean active,
+      @Name(value = "Categories") List<String> categories,
+      @Name(value = "CreationDate") Long creationDate,
+      @Name(value = "CypherRequest") String cypherRequest,
+      @Name(value = "CypherRequestReturn") String cypherRequestReturn,
+      @Name(value = "Description") String description,
+      @Name(value = "GroupName") String groupName,
+      @Name(value = "Name") String name,
+      @Name(value = "Selected") Boolean selected,
+      @Name(value = "Types") List<String> types)
+      throws ProcedureException {
+
+    try {
+      Neo4jAL nal = new Neo4jAL(db, transaction, log);
+      Group group =
+          ParisGroupController.mergeAsToSort(
+              nal,
+              active,
+              categories,
+              creationDate,
+              cypherRequest,
+              cypherRequestReturn,
+              description,
+              groupName,
+              name,
+              selected,
+              types);
+
+      if(group == null) return Stream.empty();
+      return Stream.of(new CustomGroupResult(group));
+
+    } catch (Exception | Neo4jConnectionError | Neo4jQueryException e) {
+      ProcedureException ex = new ProcedureException(e);
+      log.error("An error occurred while executing the procedure", e);
+      throw ex;
+    }
+  }
+
   @Procedure(value = "paris.groups.update.by.id", mode = Mode.WRITE)
   @Description(
       "paris.groups.update.by.id(Boolean active, List<String> categories, Long creationDate, String cypherRequest, String cypherRequestReturn, String description, String groupName, String name, Boolean selected, List<String> typesAsList) - Delete a specific groups using its id")

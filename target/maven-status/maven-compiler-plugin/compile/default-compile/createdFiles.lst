@@ -35,6 +35,7 @@ com\castsoftware\paris\procedures\CypherProcedures.class
 com\castsoftware\paris\models\Group\GroupType.class
 com\castsoftware\paris\exceptions\file\FilePermissionException.class
 com\castsoftware\paris\exceptions\neo4j\Neo4JTemplateLanguageException.class
+com\castsoftware\paris\procedures\ICUProcedures.class
 com\castsoftware\paris\exceptions\neo4j\Neo4jConnectionError.class
 com\castsoftware\paris\io\Exporter.class
 com\castsoftware\paris\utils\Workspace.class

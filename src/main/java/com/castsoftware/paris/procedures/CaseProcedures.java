@@ -43,6 +43,21 @@ public class CaseProcedures {
 		}
 	}
 
+	@Procedure(value = "paris.cases.get.number", mode = Mode.WRITE)
+	@Description("paris.cases.get.number() - Get number of cases present in the database")
+	public Stream<LongResult> getNumUseCase() throws ProcedureException {
+
+		try {
+			Neo4jAL nal = new Neo4jAL(db, transaction, log);
+
+			Long num = ParisCaseController.getNumberCase(nal);
+			return Stream.of(new LongResult(num));
+		} catch (Exception | Neo4jConnectionError | Neo4jQueryException e) {
+			ProcedureException ex = new ProcedureException(e);
+			log.error("An error occurred while executing the procedure", e);
+			throw ex;
+		}
+	}
 
 	@Procedure(value = "paris.cases.get.all.categories", mode = Mode.WRITE)
 	@Description("paris.cases.get.all.categories() - Get the list of use case categories")

@@ -123,12 +123,100 @@ public class ParisGroupController {
 		return dn;
 	}
 
+
+	/**
+	 * Merge a Group in the database
+	 * @param neo4jAL Neo4j acces Layer
+	 * @param active Active property
+	 * @param categories Categories
+	 * @param creationDate
+	 * @param cypherRequest
+	 * @param cypherRequestReturn
+	 * @param description
+	 * @param groupName
+	 * @param name
+	 * @param selected
+	 * @param typesAsList
+	 * @return <code>Group</code> Group if a node was created, null if the node already exists
+	 * @throws Neo4jQueryException
+	 */
+	public static Group merge(Neo4jAL neo4jAL,
+											Boolean active,
+											List<String> categories,
+											Long creationDate,
+											String cypherRequest,
+											String cypherRequestReturn,
+											String description,
+											String groupName,
+											String name,
+											Boolean selected,
+											List<String> typesAsList) throws Neo4jQueryException {
+		// Find a node with
+		String req = String.format("MATCH (o:%s) WHERE o.%s=$CypherReq AND o.%s=$CypherReturn RETURN o as node LIMIT 1",
+				Group.getLabelPropertyAsString(),
+				Group.getCypherRequestProperty(),
+				Group.getCypherRequestReturnProperty());
+		Map<String, Object> params = Map.of("CypherReq", cypherRequest, "CypherReturn", cypherRequestReturn);
+
+		Result res = neo4jAL.executeQuery(req, params);
+
+		// If has next, end. We found a similar Group
+		if(res.hasNext()) return null;
+
+		// Else create and return the Group
+		return createGroup(neo4jAL, active, categories, creationDate, cypherRequest, cypherRequestReturn, description, groupName, name, selected, typesAsList);
+	}
+
+
+	/**
+	 * Merge a Group in the database
+	 * @param neo4jAL Neo4j acces Layer
+	 * @param active Active property
+	 * @param categories Categories
+	 * @param creationDate
+	 * @param cypherRequest
+	 * @param cypherRequestReturn
+	 * @param description
+	 * @param groupName
+	 * @param name
+	 * @param selected
+	 * @param typesAsList
+	 * @return <code>Boolean</code> Group if a node was created, false if the node already exists
+	 * @throws Neo4jQueryException
+	 */
+	public static Group mergeAsToSort(Neo4jAL neo4jAL,
+									  Boolean active,
+									  List<String> categories,
+									  Long creationDate,
+									  String cypherRequest,
+									  String cypherRequestReturn,
+									  String description,
+									  String groupName,
+									  String name,
+									  Boolean selected,
+									  List<String> typesAsList) throws Neo4jQueryException {
+
+		Group g = merge(neo4jAL, active, categories, creationDate, cypherRequest, cypherRequestReturn, description, groupName, name, selected, typesAsList);
+		if(g == null) return null;
+
+		// Else find or create a parent useCase named 'To Sort'
+		Case c = ParisCaseController.findByTitle(neo4jAL, "To Sort");
+
+		// if nothing was found create a new Case
+		if(c == null) {
+			c = ParisCaseController.createCase(neo4jAL, "To Sort", "Groups to be sorted", new ArrayList<>(), false, false);
+		}
+
+		attachToCase(neo4jAL, g.getNode().getId(), c.getNode().getId());
+		return g;
+	}
+
 	/**
 	 * Update a group by its id
 	 * @param neo4jAL Neo4j Access Layer
 	 * @param id Id of the Dionysus node
 	 * @param active
-	 * @param categories
+	 * @param categories Categories related to the Group
 	 * @param creationDate
 	 * @param cypherRequest
 	 * @param cypherRequestReturn

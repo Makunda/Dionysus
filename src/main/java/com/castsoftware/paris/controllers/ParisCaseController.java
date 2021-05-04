@@ -51,6 +51,43 @@ public class ParisCaseController {
 	}
 
 	/**
+	 * Get number of Use Case
+	 * @param neo4jAL Neo4j Access Layer
+	 * @return
+	 * @throws Neo4jQueryException
+	 */
+	public static Long getNumberCase(Neo4jAL neo4jAL) throws Neo4jQueryException {
+		String req = String.format("MATCH (o:%1$s) RETURN COUNT(o) as count", Case.getLabelPropertyAsString());
+		Result result = neo4jAL.executeQuery(req);
+
+		Long num = 0L;
+		if (result.hasNext()) {
+			num = (Long) result.next().get("count");
+		}
+		return num;
+	}
+
+	/**
+	 * Find or create Use Case by title
+	 * @param neo4jAL Neo4j Access Layer
+	 * @param title Title of the Use case to search
+	 * @return
+	 * @throws Neo4jQueryException
+	 */
+	public static Case findByTitle(Neo4jAL neo4jAL, String title) throws Neo4jQueryException {
+		String req = String.format("MATCH (o:%s) WHERE o.%s=$Title RETURN o as case", Case.getLabelPropertyAsString(), Case.getTitleProperty());
+		Map<String, Object> params = Map.of("Title", title);
+
+		Result result = neo4jAL.executeQuery(req, params);
+
+		if (result.hasNext()) {
+			return Case.fromNode((Node) result.next().get("case"));
+		}
+
+		return null;
+	}
+
+	/**
 	 * Delete the Case node by Id
 	 * @param neo4jAL Neo4j Access Layer
 	 * @param id Id of the node
